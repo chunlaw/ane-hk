@@ -7,7 +7,8 @@
   "license": "GPL",
   "private": false,
   "scripts": {
-    "crawl": "tsx src/crawl.ts"
+    "crawl": "tsx src/crawl.ts",
+    "rollout": "yarn crawl && gh-pages -d dist -a"
   },
   "devDependencies": {
     "@types/date-fns": "^2.6.0",
