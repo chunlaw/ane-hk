@@ -1,6 +1,6 @@
 {
   "name": "ane-hk",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Library for accessing A&E waiting time data in Hong Kong hospital",
   "main": "dist/index.js",
   "module": "esm/index.js",
@@ -10,11 +10,11 @@
     "esm"
   ],
   "scripts":{
-    "clean": "rimraf dist",
+    "clean": "rimraf dist esm",
     "test": "jest",
     "build:esm": "tsc --target es2018 --outDir esm",
     "build:cjs": "tsc --target es2015 --module commonjs --outDir dist",
-    "build": "yarn build:cjs && yarn build:esm"
+    "build": "yarn clean && yarn build:cjs && yarn build:esm"
   },
   "repository": {
     "url": "https://github.com/chunlaw/ane-hk/tree/npm",
