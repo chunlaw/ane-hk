@@ -1,0 +1,43 @@
+{
+  "name": "ane-hk",
+  "version": "1.0.0",
+  "description": "Library for accessing A&E waiting time data in Hong Kong hospital",
+  "main": "dist/index.js",
+  "module": "esm/index.js",
+  "files": [
+    "src",
+    "dist",
+    "esm"
+  ],
+  "scripts":{
+    "clean": "rimraf dist",
+    "test": "jest",
+    "build:esm": "tsc --target es2018 --outDir esm",
+    "build:cjs": "tsc --target es2015 --module commonjs --outDir dist",
+    "build": "yarn build:cjs && yarn build:esm"
+  },
+  "repository": {
+    "url": "https://github.com/chunlaw/ane-hk/tree/npm",
+    "type": "git"
+  },
+  "homepage": "https://ane-hk.chunlaw.io",
+  "author": "Law Wai Chun <chunlaw@rocketmail.com>",
+  "license": "GPL-3.0-only",
+  "keywords": [
+    "Waiting time",
+    "Accident & Emergency",
+    "Accident and Emergency",
+    "health",
+    "Hong Kong"
+  ],
+  "private": false,
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "csvtojson": "^2.0.10",
+    "jest": "^29.7.0",
+    "rimraf": "^5.0.5",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.2"
+  }
+}
