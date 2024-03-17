@@ -1,8 +1,14 @@
 import moment from "moment-timezone"
 import { existsSync, mkdirSync, writeFileSync } from "fs"
 import path from "path";
+import _fetchRetry from "fetch-retry"
 
-fetch("https://www.ha.org.hk/opendata/aed/aedwtdata-en.json")
+const fetchRetry = _fetchRetry(fetch)
+
+fetchRetry("https://www.ha.org.hk/opendata/aed/aedwtdata-en.json", {
+  retries: 3,
+  retryDelay: 10000,
+})
   .then(r => r.json())
   .then(async ({updateTime, waitTime}) => {
     const logMoment = moment.tz(updateTime, "D/M/YYYY h:mma", true, "Asia/Hong_Kong").tz("Asia/Hong_Kong");
@@ -15,7 +21,7 @@ fetch("https://www.ha.org.hk/opendata/aed/aedwtdata-en.json")
 
     waitTime.map(({hospName, topWait}) => {
       const filename = hospName.replace(/ /g, "-") + ".tsv";
-      fetch(`https://raw.githubusercontent.com/chunlaw/ane-hk/data/${logMoment.format("YYYY")}/${logMoment.format("MM")}/${logMoment.format("DD")}/${filename}`).then(r => {
+      fetchRetry(`https://raw.githubusercontent.com/chunlaw/ane-hk/data/${logMoment.format("YYYY")}/${logMoment.format("MM")}/${logMoment.format("DD")}/${filename}`).then(r => {
         if ( r.status === 404 ) return "UpdateTime\tTopWait\n"
         return r.text()
       }).then(content => {
