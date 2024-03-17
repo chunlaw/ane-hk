@@ -1,6 +1,6 @@
 import { Hospital } from "./types";
 
-export const HospitalMap: Partial<Record<string, Hospital>> = {
+export const HOSPITAL_MAP: Partial<Record<string, Hospital>> = {
   雅麗氏何妙齡那打素醫院: "Alice Ho Miu Ling Nethersole Hospital",
   明愛醫院: "Caritas Medical Centre",
   廣華醫院: "Kwong Wah Hospital",

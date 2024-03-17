@@ -1,4 +1,4 @@
-import { HospitalMap } from "./constants"
+import { HOSPITAL_MAP } from "./constants"
 import { DayTimePoint, Hospital, HospitalZh } from "./types"
 
 export default class AneHk {
@@ -30,7 +30,7 @@ export default class AneHk {
   }
 
   getWaitingTime(year: number | string, month: number | string, day: number | string, hospital: Hospital | HospitalZh ): Promise<Partial<Record<DayTimePoint, string>>> {
-    const hospitalKey = HospitalMap[hospital] ?? hospital as Hospital;
+    const hospitalKey = HOSPITAL_MAP[hospital] ?? hospital as Hospital;
     month = String(month).padStart(2, '0')
     day = String(day).padStart(2, '0')
     const key = `${year}${month}${day}`
