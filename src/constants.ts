@@ -84,3 +84,41 @@ export const HOSPITAL_GEOCOOR: Record<Hospital, {lat: number, long: number}> = {
   "United Christian Hospital": { lat: 22.322561, long: 114.2229544},
   "Yan Chai Hospital": { lat: 22.3697863, long: 114.1169341},
 }
+
+export const POSSIBLE_WAIT_MSG = {
+  zh: [
+    "大約 1 小時",
+    "超過 1 小時",
+    "超過 2 小時",
+    "超過 3 小時",
+    "超過 4 小時",
+    "超過 5 小時",
+    "超過 6 小時",
+    "超過 7 小時",
+    "超過 8 小時",
+    "超過 9 小時",
+    "超過 10 小時",
+    "超過 11 小時",
+    "超過 12 小時",
+    "超過 13 小時",
+    "超過 14 小時",
+  ],
+  en: [
+    "Around 1 hour",
+    "Over 1 hour",
+    "Over 2 hours",
+    "Over 3 hours",
+    "Over 4 hours",
+    "Over 5 hours",
+    "Over 6 hours",
+    "Over 7 hours",
+    "Over 8 hours",
+    // prepare below for bufferring
+    "Over 9 hours",
+    "Over 10 hours",
+    "Over 11 hours",
+    "Over 12 hours",
+    "Over 13 hours",
+    "Over 14 hours",
+  ]
+}
