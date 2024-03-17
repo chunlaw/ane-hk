@@ -63,3 +63,21 @@ export type HospitalZh =
   | "天水圍醫院"
   | "基督教聯合醫院"
   | "仁濟醫院"
+
+export type WaitMsg = 
+  | "" // no data
+  | "Around 1 hour"
+  | "Over 1 hour"
+  | "Over 2 hours"
+  | "Over 3 hours"
+  | "Over 4 hours"
+  | "Over 5 hours"
+  | "Over 6 hours"
+  | "Over 7 hours"
+  | "Over 8 hours"
+  | "Over 9 hours"
+  | "Over 10 hours"
+  | "Over 11 hours"
+  | "Over 12 hours"
+  | "Over 13 hours"
+  | "Over 14 hours"

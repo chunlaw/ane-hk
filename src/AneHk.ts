@@ -1,11 +1,10 @@
-import { HOSPITAL_MAP, POSSIBLE_WAIT_MSG } from "./constants"
-import { DayTimePoint, Hospital, HospitalZh } from "./types"
+import { POSSIBLE_WAIT_MSG } from "./constants"
+import { DayTimePoint, Hospital, WaitMsg } from "./types"
 
 export default class AneHk {
   private cache: Record<Hospital, Record<string, Partial<Record<DayTimePoint, number>>>>
-  private lang: "en" | "zh"
 
-  constructor ({lang = "zh"}: {lang?: "en" | "zh"} = {}) {
+  constructor () {
     this.cache = {
       "Alice Ho Miu Ling Nethersole Hospital": {},
       "Caritas Medical Centre": {},
@@ -26,11 +25,10 @@ export default class AneHk {
       "United Christian Hospital": {},
       "Yan Chai Hospital": {},
     }
-    this.lang = lang
   }
 
-  getWaitingTime(year: number | string, month: number | string, day: number | string, hospital: Hospital | HospitalZh ): Promise<Partial<Record<DayTimePoint, string>>> {
-    const hospitalKey = HOSPITAL_MAP[hospital] ?? hospital as Hospital;
+  getWaitingTime(year: number | string, month: number | string, day: number | string, hospital: Hospital ): Promise<Partial<Record<DayTimePoint, string>>> {
+    const hospitalKey = hospital;
     month = String(month).padStart(2, '0')
     day = String(day).padStart(2, '0')
     const key = `${year}${month}${day}`
@@ -38,12 +36,12 @@ export default class AneHk {
     const parseRet = (obj: Partial<Record<DayTimePoint, number>>) => (
       Object.entries(obj)
         .reduce((acc, [time, v]) => {
-          acc[time as DayTimePoint] = POSSIBLE_WAIT_MSG[this.lang][v]
+          acc[time as DayTimePoint] = v !== -1 ? POSSIBLE_WAIT_MSG[v] : ""
           return acc
-        }, {} as Partial<Record<DayTimePoint, string>>)
+        }, {} as Partial<Record<DayTimePoint, WaitMsg>>)
     )
 
-    if ( this.cache[hospitalKey][key] ) {
+    if ( this.cache[hospitalKey][key] && this.cache[hospital][key]["23:45"] ) {
       return Promise.resolve(
         parseRet(this.cache[hospitalKey][key])
       )
@@ -59,7 +57,7 @@ export default class AneHk {
         .then(txt => {
           const ret = txt.split("\n").slice(1).reduce((acc, entry) => {
             const [time, msg] = entry.split("\t");
-            if ( time ) acc[time.slice(-5) as DayTimePoint] = POSSIBLE_WAIT_MSG.en.indexOf(msg)
+            if ( time ) acc[time.slice(-5) as DayTimePoint] = POSSIBLE_WAIT_MSG.indexOf(msg as WaitMsg)
             return acc
           }, {} as Partial<Record<DayTimePoint, number>>)
           this.cache[hospitalKey][key] = ret
@@ -70,6 +68,18 @@ export default class AneHk {
           return {}
         })
     )
+  }
 
+  getLast24Hours( hospital: Hospital ): Promise<Array<[DayTimePoint, string]>> {
+    const today = new Date()
+    const yesterday = new Date()
+    yesterday.setDate(today.getDate()-1)
+    console.log(today.getDate(), yesterday.getDate())
+    return Promise.all([
+      this.getWaitingTime(today.getFullYear(), today.getMonth()+1, today.getDate(), hospital),
+      this.getWaitingTime(yesterday.getFullYear(), yesterday.getMonth()+1, yesterday.getDate(), hospital)
+    ]).then(([todayTw, yesterdayTw]) => {
+      return [...Object.entries(yesterdayTw), ...Object.entries(todayTw)].slice(-96) as Array<[DayTimePoint, string]>
+    })
   }
 }

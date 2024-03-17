@@ -1,6 +1,6 @@
 import AneHk from "../src/index"
 
-const aneHk = new AneHk({lang: "en"})
+const aneHk = new AneHk()
 
 test("expected Over 2 hours", () => {
   return aneHk.getWaitingTime(2024, 3, 15, "Alice Ho Miu Ling Nethersole Hospital")

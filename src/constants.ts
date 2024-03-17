@@ -1,24 +1,24 @@
-import { Hospital } from "./types";
+import { Hospital, HospitalZh, WaitMsg } from "./types";
 
-export const HOSPITAL_MAP: Partial<Record<string, Hospital>> = {
-  雅麗氏何妙齡那打素醫院: "Alice Ho Miu Ling Nethersole Hospital",
-  明愛醫院: "Caritas Medical Centre",
-  廣華醫院: "Kwong Wah Hospital",
-  北區醫院: "North District Hospital",
-  北大嶼山醫院: "North Lantau Hospital",
-  瑪嘉烈醫院: "Princess Margaret Hospital",
-  博愛醫院: "Pok Oi Hospital",
-  威爾斯親王醫院: "Prince of Wales Hospital",
-  東區尤德夫人那打素醫院: "Pamela Youde Nethersole Eastern Hospital",
-  伊利沙伯醫院: "Queen Elizabeth Hospital",
-  瑪麗醫院: "Queen Mary Hospital",
-  律敦治醫院: "Ruttonjee Hospital",
-  長洲醫院: "St John Hospital",
-  將軍澳醫院: "Tseung Kwan O Hospital",
-  屯門醫院: "Tuen Mun Hospital",
-  天水圍醫院: "Tin Shui Wai Hospital",
-  基督教聯合醫院: "United Christian Hospital",
-  仁濟醫院: "Yan Chai Hospital",
+export const HOSPITAL_MAP: Partial<Record<Hospital, HospitalZh>> = {
+  "Alice Ho Miu Ling Nethersole Hospital": "雅麗氏何妙齡那打素醫院",
+  "Caritas Medical Centre": "明愛醫院",
+  "Kwong Wah Hospital": "廣華醫院",
+  "North District Hospital": "北區醫院",
+  "North Lantau Hospital": "北大嶼山醫院",
+  "Princess Margaret Hospital": "瑪嘉烈醫院",
+  "Pok Oi Hospital": "博愛醫院",
+  "Prince of Wales Hospital": "威爾斯親王醫院",
+  "Pamela Youde Nethersole Eastern Hospital": "東區尤德夫人那打素醫院",
+  "Queen Elizabeth Hospital": "伊利沙伯醫院",
+  "Queen Mary Hospital": "瑪麗醫院",
+  "Ruttonjee Hospital": "律敦治醫院",
+  "St John Hospital": "長洲醫院",
+  "Tseung Kwan O Hospital": "將軍澳醫院",
+  "Tuen Mun Hospital": "屯門醫院",
+  "Tin Shui Wai Hospital": "天水圍醫院",
+  "United Christian Hospital": "基督教聯合醫院",
+  "Yan Chai Hospital": "仁濟醫院",
 }
 
 export const AVAILABLE_HOSPITALS = {
@@ -85,40 +85,21 @@ export const HOSPITAL_GEOCOOR: Record<Hospital, {lat: number, long: number}> = {
   "Yan Chai Hospital": { lat: 22.3697863, long: 114.1169341},
 }
 
-export const POSSIBLE_WAIT_MSG = {
-  zh: [
-    "大約 1 小時",
-    "超過 1 小時",
-    "超過 2 小時",
-    "超過 3 小時",
-    "超過 4 小時",
-    "超過 5 小時",
-    "超過 6 小時",
-    "超過 7 小時",
-    "超過 8 小時",
-    "超過 9 小時",
-    "超過 10 小時",
-    "超過 11 小時",
-    "超過 12 小時",
-    "超過 13 小時",
-    "超過 14 小時",
-  ],
-  en: [
-    "Around 1 hour",
-    "Over 1 hour",
-    "Over 2 hours",
-    "Over 3 hours",
-    "Over 4 hours",
-    "Over 5 hours",
-    "Over 6 hours",
-    "Over 7 hours",
-    "Over 8 hours",
-    // prepare below for bufferring
-    "Over 9 hours",
-    "Over 10 hours",
-    "Over 11 hours",
-    "Over 12 hours",
-    "Over 13 hours",
-    "Over 14 hours",
-  ]
-}
+export const POSSIBLE_WAIT_MSG: WaitMsg[] = [
+  "Around 1 hour",
+  "Over 1 hour",
+  "Over 2 hours",
+  "Over 3 hours",
+  "Over 4 hours",
+  "Over 5 hours",
+  "Over 6 hours",
+  "Over 7 hours",
+  "Over 8 hours",
+  // prepare below for bufferring
+  "Over 9 hours",
+  "Over 10 hours",
+  "Over 11 hours",
+  "Over 12 hours",
+  "Over 13 hours",
+  "Over 14 hours",
+]
