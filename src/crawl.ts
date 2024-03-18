@@ -2,8 +2,33 @@ import moment from "moment-timezone"
 import { existsSync, mkdirSync, writeFileSync } from "fs"
 import path from "path";
 
+const topWaitConvert = {
+  "Around 1 hour": "< 1",
+  "Over 1 hour": "> 1",
+  "Over 2 hours": "> 2",
+  "Over 3 hours": "> 3",
+  "Over 4 hours": "> 4",
+  "Over 5 hours": "> 5",
+  "Over 6 hours": "> 6",
+  "Over 7 hours": "> 7",
+  "Over 8 hours": "> 8",
+  "Over 9 hours": "> 9",
+  "Over 10 hours": "> 10",
+  "Over 11 hours": "> 11",
+  "Over 12 hours": "> 12",
+}
+
 fetch("https://www.ha.org.hk/opendata/aed/aedwtdata-en.json")
   .then(r => r.json())
+  .then(({updateTime, waitTime}) => {
+    return ({
+      updateTime,
+      waitTime: waitTime.map(({topWait, ...v}) => ({
+        ...v,
+        topWait: topWaitConvert[topWait] ?? topWait
+      }))
+    })
+  })
   .catch(() => 
     fetch("https://www.ha.org.hk/aedwt/data/aedWtData.json")
     .then(r => r.json())
@@ -15,7 +40,7 @@ fetch("https://www.ha.org.hk/opendata/aed/aedwtdata-en.json")
       }))
     }))
   )
-  .then(async ({updateTime, waitTime}) => {
+  .then(({updateTime, waitTime}) => {
     const logMoment = moment.tz(updateTime, "D/M/YYYY h:mma", true, "Asia/Hong_Kong").tz("Asia/Hong_Kong");
     const directory = path.join(process.cwd(), "dist", logMoment.format("YYYY"), logMoment.format("MM"), logMoment.format("DD") )
     if ( !existsSync(directory) ) {
