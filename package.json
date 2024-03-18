@@ -21,7 +21,6 @@
     "@types/moment": "^2.13.0",
     "@types/moment-timezone": "^0.5.30",
     "date-fns": "^3.4.0",
-    "fetch-retry": "^5.0.6",
     "moment": "^2.30.1",
     "moment-timezone": "^0.5.45"
   }
