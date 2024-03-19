@@ -2,7 +2,7 @@ import { POSSIBLE_WAIT_MSG } from "./constants"
 import { DayTimePoint, Hospital, WaitMsg } from "./types"
 
 export default class AneHk {
-  private cache: Record<Hospital, Record<string, Partial<Record<DayTimePoint, number>>>>
+  private cache: Record<Hospital, Record<string, Partial<Record<DayTimePoint, WaitMsg | undefined>>>>
 
   constructor () {
     this.cache = {
@@ -27,24 +27,42 @@ export default class AneHk {
     }
   }
 
-  getWaitingTime(year: number | string, month: number | string, day: number | string, hospital: Hospital ): Promise<Partial<Record<DayTimePoint, string>>> {
+  getWaitingTime(targetDate: Date, hospital: Hospital ): Promise<Partial<Record<string, WaitMsg | undefined>>> {
     const hospitalKey = hospital;
-    month = String(month).padStart(2, '0')
-    day = String(day).padStart(2, '0')
-    const key = `${year}${month}${day}`
+    if ( targetDate.getMinutes() <= 15 ) {
+      targetDate.setMinutes(0)
+    } else if ( targetDate.getMinutes() <= 30 ) {
+      targetDate.setMinutes(15)
+    } else if ( targetDate.getMinutes() <= 45 ) {
+      targetDate.setMinutes(30)
+    } else if ( targetDate.getMinutes() <= 59 ) {
+      targetDate.setMinutes(45)
+    }
+    
+    const year = targetDate.getFullYear();
+    const month = String(targetDate.getMonth()+1).padStart(2, '0')
+    const day = String(targetDate.getDate()).padStart(2, '0')
+    const hour = String(targetDate.getHours()).padStart(2, '0')
+    const minute = String(targetDate.getMinutes()).padStart(2, '0')
+    const key = `${targetDate.getFullYear()}${month}${day}`
 
-    const parseRet = (obj: Partial<Record<DayTimePoint, number>>) => (
-      Object.entries(obj)
-        .reduce((acc, [time, v]) => {
-          acc[time as DayTimePoint] = v !== -1 ? POSSIBLE_WAIT_MSG[v] : ""
-          return acc
-        }, {} as Partial<Record<DayTimePoint, WaitMsg>>)
-    )
+    const parseRet = (obj: Partial<Record<DayTimePoint, WaitMsg | undefined>>) => ({
+      [`${year}-${month}-${day} ${hour}:${minute}`] : 
+        Object.entries(obj)
+          .filter(([time, v]) => {
+            if ( time !== `${hour}:${minute}` ) return false;
+            return true
+          }).map(([_, msg]) => msg)[0]
+    })
 
-    if ( this.cache[hospitalKey][key] && this.cache[hospital][key]["23:45"] ) {
-      return Promise.resolve(
-        parseRet(this.cache[hospitalKey][key])
-      )
+    if ( this.cache[hospitalKey][key] ) {
+      const today = new Date()
+      const _targetDate = new Date(targetDate)
+      if ( today.setHours(0, 0, 0, 0) !== _targetDate.setHours(0, 0, 0, 0) ) {
+        return Promise.resolve(
+          parseRet(this.cache[hospitalKey][key])
+        )
+      }
     }
     return (
       fetch(`https://raw.githubusercontent.com/chunlaw/ane-hk/data/${year}/${month}/${day}/${hospital.replace(/ /g, "-")}.tsv`)
@@ -57,9 +75,9 @@ export default class AneHk {
         .then(txt => {
           const ret = txt.split("\n").slice(1).reduce((acc, entry) => {
             const [time, msg] = entry.split("\t");
-            if ( time ) acc[time.slice(-5) as DayTimePoint] = POSSIBLE_WAIT_MSG.indexOf(msg as WaitMsg)
+            if ( time ) acc[time.slice(-5) as DayTimePoint] = msg as WaitMsg
             return acc
-          }, {} as Partial<Record<DayTimePoint, number>>)
+          }, {} as Partial<Record<DayTimePoint, WaitMsg>>)
           this.cache[hospitalKey][key] = ret
           return parseRet(ret)
         })
@@ -70,16 +88,86 @@ export default class AneHk {
     )
   }
 
-  getLast24Hours( hospital: Hospital ): Promise<Array<[DayTimePoint, string]>> {
-    const today = new Date()
-    const yesterday = new Date()
-    yesterday.setDate(today.getDate()-1)
-    console.log(today.getDate(), yesterday.getDate())
-    return Promise.all([
-      this.getWaitingTime(today.getFullYear(), today.getMonth()+1, today.getDate(), hospital),
-      this.getWaitingTime(yesterday.getFullYear(), yesterday.getMonth()+1, yesterday.getDate(), hospital)
-    ]).then(([todayTw, yesterdayTw]) => {
-      return [...Object.entries(yesterdayTw), ...Object.entries(todayTw)].slice(-96) as Array<[DayTimePoint, string]>
+  async getLatestWaitingTime(hospital: Hospital): Promise<Partial<Record<string, WaitMsg | undefined>>> {
+    const latestDate = new Date();
+    let ret = {}
+    for ( let i=0;i<96;++i ) {
+      ret = await this.getWaitingTime(new Date(latestDate), hospital)
+      if ( Object.values(ret)[0] !== undefined ) {
+        return ret;
+      }
+      latestDate.setMinutes(latestDate.getMinutes() - 15)
+    }
+    return ret
+  }
+
+  getLast24HoursForParticularDate( targetDate: Date, hospital: Hospital, imputed: boolean = true ): Promise<Array<[string, WaitMsg | undefined]>> {
+    const datetimes: Date[] = []
+    const qDate = new Date(targetDate)
+    for ( let i=0;i<96; ++i ) {
+      datetimes.push(new Date(qDate))
+      qDate.setMinutes(qDate.getMinutes() - 15)
+    }
+       
+    return Promise.all(
+      datetimes.map(d => this.getWaitingTime(d, hospital))
+    ).then(data => data.map(v => Object.entries(v)[0]))
+    .then(v => {
+      if ( !imputed ) return v;
+      for ( let i=94;i>=0;--i ) {
+        if ( imputed && v[i][1] === undefined && v[i+1][1] !== undefined ) {
+          v[i][1] = v[i+1][1]
+        }
+      }
+      return v
     })
+  }
+
+  calculateWaitTime( targetDate: Date, hospital: Hospital ): Promise<WaitMsg | undefined> {
+    const tmpDate = new Date(targetDate)
+    if ( tmpDate.getMinutes() % 15 !== 0 ) {
+      tmpDate.setMinutes(Math.floor(tmpDate.getMinutes() / 15) * 15)
+    }
+    tmpDate.setHours(tmpDate.getHours() + 24)
+    return this.getLast24HoursForParticularDate(tmpDate, hospital)
+      .then(entries => {
+        return entries.reduce<WaitMsg | undefined>((acc, entry) => {
+          if ( entry === undefined ) return acc;
+          const [time, msg] = entry
+          if ( msg === undefined ) return acc
+          const waitHourIdx = POSSIBLE_WAIT_MSG.indexOf(msg)
+          if ( waitHourIdx === -1 ) return acc
+          const waitHour = waitHourIdx + 1
+          const refDate = new Date(time.replace(" ", "T") + ":00.000+08:00")
+          refDate.setHours(refDate.getHours() - waitHour)
+          if ( refDate >= targetDate ) {
+            return msg
+          }
+          return acc
+        }, undefined)
+      })
+  }
+
+  clearCache() {
+    this.cache = {
+      "Alice Ho Miu Ling Nethersole Hospital": {},
+      "Caritas Medical Centre": {},
+      "Kwong Wah Hospital": {},
+      "North District Hospital": {},
+      "North Lantau Hospital": {},
+      "Princess Margaret Hospital": {},
+      "Pok Oi Hospital": {},
+      "Prince of Wales Hospital": {},
+      "Pamela Youde Nethersole Eastern Hospital": {},
+      "Queen Elizabeth Hospital": {},
+      "Queen Mary Hospital": {},
+      "Ruttonjee Hospital": {},
+      "St John Hospital": {},
+      "Tseung Kwan O Hospital": {},
+      "Tuen Mun Hospital": {},
+      "Tin Shui Wai Hospital": {},
+      "United Christian Hospital": {},
+      "Yan Chai Hospital": {},
+    }
   }
 }
