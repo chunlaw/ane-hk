@@ -2,7 +2,7 @@ import { POSSIBLE_WAIT_MSG } from "./constants";
 import { DayTimePoint, Hospital, WaitMsg } from "./types";
 
 export default class AneHk {
-  private cache: Record<
+  cache: Record<
     Hospital,
     Record<string, Partial<Record<DayTimePoint, WaitMsg | undefined>>>
   >;
@@ -53,6 +53,12 @@ export default class AneHk {
     const minute = String(_targetDate.getMinutes()).padStart(2, "0");
     const key = `${_targetDate.getFullYear()}${month}${day}`;
 
+    if (_targetDate > new Date()) {
+      return Promise.resolve({
+        [`${year}-${month}-${day} ${hour}:${minute}`]: undefined,
+      });
+    }
+
     const parseRet = (
       obj: Partial<Record<DayTimePoint, WaitMsg | undefined>>
     ) => ({
@@ -66,10 +72,13 @@ export default class AneHk {
 
     if (
       this.cache[hospitalKey][key] &&
-      this.cache[hospitalKey][key][`${hour}:${minute}` as DayTimePoint]
+      (!isToday(targetDate) ||
+        `${hour}:${minute}` <=
+          Object.keys(this.cache[hospitalKey][key]).slice(-1)[0])
     ) {
       return Promise.resolve(parseRet(this.cache[hospitalKey][key]));
     }
+
     return fetch(
       `https://raw.githubusercontent.com/chunlaw/ane-hk/data/${year}/${month}/${day}/${hospital.replace(/ /g, "-")}.tsv`
     )
@@ -117,7 +126,7 @@ export default class AneHk {
     return ret;
   }
 
-  getLast24HoursForParticularDate(
+  async getLast24HoursForParticularDate(
     targetDate: Date,
     hospital: Hospital,
     imputed: boolean = true
@@ -129,17 +138,20 @@ export default class AneHk {
       qDate.setMinutes(qDate.getMinutes() - 15);
     }
 
-    return Promise.all(datetimes.map((d) => this.getWaitingTime(d, hospital)))
-      .then((data) => data.map((v) => Object.entries(v)[0]))
-      .then((v) => {
-        if (!imputed) return v;
-        for (let i = 94; i >= 0; --i) {
-          if (imputed && v[i][1] === undefined && v[i + 1][1] !== undefined) {
-            v[i][1] = v[i + 1][1];
-          }
+    const data = [];
+    for (const datetime of datetimes) {
+      data.push(await this.getWaitingTime(datetime, hospital));
+    }
+
+    return Promise.resolve(data.map((v) => Object.entries(v)[0])).then((v) => {
+      if (!imputed) return v;
+      for (let i = 94; i >= 0; --i) {
+        if (imputed && v[i][1] === undefined && v[i + 1][1] !== undefined) {
+          v[i][1] = v[i + 1][1];
         }
-        return v;
-      });
+      }
+      return v;
+    });
   }
 
   calculateWaitTime(
@@ -194,3 +206,9 @@ export default class AneHk {
     };
   }
 }
+
+const isToday = (date: Date): boolean => {
+  const _date = new Date(date);
+  const today = new Date();
+  return _date.setHours(0, 0, 0, 0) == today.setHours(0, 0, 0, 0);
+};

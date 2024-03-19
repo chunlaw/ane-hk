@@ -3,8 +3,10 @@ import AneHk from "./AneHk";
 const aneHk = new AneHk();
 
 const curDate = new Date();
-curDate.setMinutes(curDate.getMinutes() - 10);
+curDate.setHours(curDate.getHours() - 96);
 
 aneHk
-  .getWaitingTime(curDate, "Tseung Kwan O Hospital")
-  .then((v) => console.log(v));
+  .calculateWaitTime(new Date(), "Alice Ho Miu Ling Nethersole Hospital")
+  .then((v) => {
+    console.log(v);
+  });

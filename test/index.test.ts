@@ -12,7 +12,9 @@ test("test retrieve single value", () => {
 
 test("Calculate current wait time", () => {
   return aneHk.calculateWaitTime(new Date(), "Alice Ho Miu Ling Nethersole Hospital")
-    .then(res => expect(res).toBe(undefined))
+    .then(res => {
+      expect(res).toBe(undefined)
+    })
 })
 
 test("test 24 hours", () => {
