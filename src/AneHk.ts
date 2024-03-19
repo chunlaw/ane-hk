@@ -64,12 +64,11 @@ export default class AneHk {
         .map(([_, msg]) => msg)[0],
     });
 
-    if (this.cache[hospitalKey][key]) {
-      const today = new Date();
-      const _tmp = new Date(_targetDate);
-      if (today.setHours(0, 0, 0, 0) !== _tmp.setHours(0, 0, 0, 0)) {
-        return Promise.resolve(parseRet(this.cache[hospitalKey][key]));
-      }
+    if (
+      this.cache[hospitalKey][key] &&
+      this.cache[hospitalKey][key][`${hour}:${minute}` as DayTimePoint]
+    ) {
+      return Promise.resolve(parseRet(this.cache[hospitalKey][key]));
     }
     return fetch(
       `https://raw.githubusercontent.com/chunlaw/ane-hk/data/${year}/${month}/${day}/${hospital.replace(/ /g, "-")}.tsv`
@@ -97,7 +96,9 @@ export default class AneHk {
       })
       .catch((e) => {
         this.cache[hospitalKey][key] = {};
-        return {};
+        return {
+          [`${year}-${month}-${day} ${hour}:${minute}`]: undefined,
+        };
       });
   }
 

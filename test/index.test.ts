@@ -10,11 +10,15 @@ test("test retrieve single value", () => {
     })
 })
 
+test("Calculate current wait time", () => {
+  return aneHk.calculateWaitTime(new Date(), "Alice Ho Miu Ling Nethersole Hospital")
+    .then(res => expect(res).toBe(undefined))
+})
+
 test("test 24 hours", () => {
   const targetDate = new Date("2024-03-19T14:00")
   return aneHk.getLast24HoursForParticularDate(targetDate, "Alice Ho Miu Ling Nethersole Hospital")
     .then(res => {
-
       expect(res).toEqual([
         [ '2024-03-19 14:00', '> 2' ],
         [ '2024-03-19 13:30', '> 2' ],
