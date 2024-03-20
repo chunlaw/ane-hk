@@ -145,8 +145,13 @@ export default class AneHk {
 
     return Promise.resolve(data.map((v) => Object.entries(v)[0])).then((v) => {
       if (!imputed) return v;
+      const now = new Date();
       for (let i = 94; i >= 0; --i) {
-        if (imputed && v[i][1] === undefined && v[i + 1][1] !== undefined) {
+        if (new Date(v[i][0]) > now) {
+          // no imputation for any time in future
+          continue;
+        }
+        if (v[i][1] === undefined && v[i + 1][1] !== undefined) {
           v[i][1] = v[i + 1][1];
         }
       }
