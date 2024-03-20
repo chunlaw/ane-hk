@@ -6,6 +6,7 @@ export default class AneHk {
     Hospital,
     Record<string, Partial<Record<DayTimePoint, WaitMsg | undefined>>>
   >;
+  cacheTs: number;
 
   constructor() {
     this.cache = {
@@ -28,6 +29,7 @@ export default class AneHk {
       "United Christian Hospital": {},
       "Yan Chai Hospital": {},
     };
+    this.cacheTs = 0;
   }
 
   getWaitingTime(
@@ -35,6 +37,7 @@ export default class AneHk {
     hospital: Hospital
   ): Promise<Partial<Record<string, WaitMsg | undefined>>> {
     const _targetDate = new Date(targetDate);
+    const now = new Date();
     const hospitalKey = hospital;
     if (_targetDate.getMinutes() <= 15) {
       _targetDate.setMinutes(0);
@@ -53,12 +56,6 @@ export default class AneHk {
     const minute = String(_targetDate.getMinutes()).padStart(2, "0");
     const key = `${_targetDate.getFullYear()}${month}${day}`;
 
-    if (_targetDate > new Date()) {
-      return Promise.resolve({
-        [`${year}-${month}-${day} ${hour}:${minute}`]: undefined,
-      });
-    }
-
     const parseRet = (
       obj: Partial<Record<DayTimePoint, WaitMsg | undefined>>
     ) => ({
@@ -70,13 +67,32 @@ export default class AneHk {
         .map(([_, msg]) => msg)[0],
     });
 
-    if (
-      this.cache[hospitalKey][key] &&
-      (!isToday(targetDate) ||
-        `${hour}:${minute}` <=
-          Object.keys(this.cache[hospitalKey][key]).slice(-1)[0])
-    ) {
-      return Promise.resolve(parseRet(this.cache[hospitalKey][key]));
+    if (_targetDate > now) {
+      return Promise.resolve({
+        [`${year}-${month}-${day} ${hour}:${minute}`]: undefined,
+      });
+    }
+
+    if (this.cache[hospitalKey][key]) {
+      // found in cache
+      if (isToday(targetDate)) {
+        const queryKey = `${hour}:${minute}`;
+        const latestKey = Object.keys(this.cache[hospitalKey][key]).slice(
+          -1
+        )[0];
+        if (queryKey <= latestKey) {
+          // data is available if the latest entry is recenter than the query time
+          return Promise.resolve(parseRet(this.cache[hospitalKey][key]));
+        } else if (now.getTime() - this.cacheTs <= 10 * 1000) {
+          // prevent asking the cache too frequent, cool down 10s
+          return Promise.resolve(parseRet(this.cache[hospitalKey][key]));
+        } else {
+          this.cacheTs = now.getTime();
+        }
+      } else {
+        // if not today, data should be available
+        return Promise.resolve(parseRet(this.cache[hospitalKey][key]));
+      }
     }
 
     return fetch(
