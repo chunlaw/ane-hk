@@ -115,7 +115,7 @@ setDashboardCache()
           getCalculatedWaitTime(yesterday, hospital as Hospital),
           getCalculatedWaitTime(lastWeek, hospital as Hospital),
         ]).then(([tr, yr, lwr]) => {
-          writeFileSync(path.join(directory, `${hospital.replace(/ /g, "_")}.json`), 
+          writeFileSync(path.join(directory, `${hospital.replace(/ /g, "-")}.json`), 
             JSON.stringify({
               calculatedWaitTimes: tr,
               calculatedYesterdayWaitTimes: yr,
