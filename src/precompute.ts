@@ -129,8 +129,28 @@ setDashboardCache()
 
 fetch("https://www.ha.org.hk/opendata/aed/aedwtdata-en.json")
   .then(r => r.json())
-  .then(r => 
-      writeFileSync(path.join(directory, `topWait.json`), 
-        JSON.stringify(r)
-      )
+  .then(({updateTime, waitTime}) => {
+    return ({
+      updateTime,
+      waitTime: waitTime.map(({topWait, ...v}) => ({
+        ...v,
+        topWait
+      }))
+    })
+  })
+  .catch(() => 
+    fetch("https://www.ha.org.hk/aedwt/data/aedWtData.json")
+    .then(r => r.json())
+    .then(({result: { hospData, timeEn}}) => ({
+      updateTime: timeEn,
+      waitTime: hospData.map(({hospNameEn, topWait}) => ({
+        hospName: hospNameEn,
+        topWait
+      }))
+    }))
   )
+  .then(r =>{
+    writeFileSync(path.join(directory, `topWait.json`), 
+      JSON.stringify(r)
+    )
+  })
