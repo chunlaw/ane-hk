@@ -126,3 +126,11 @@ setDashboardCache()
       })
     )
   })
+
+fetch("https://www.ha.org.hk/opendata/aed/aedwtdata-en.json")
+  .then(r => r.json())
+  .then(r => 
+      writeFileSync(path.join(directory, `topWait.json`), 
+        JSON.stringify(r)
+      )
+  )
