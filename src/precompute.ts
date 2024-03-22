@@ -26,7 +26,7 @@ const getCalculatedWaitTime =
       );
   }
 
-const run = async () => {
+const setDashboardCache = async () => {
   const output = {
     calculatedWaitTime: {},
     calculatedYesterdayWaitTime: {},
@@ -92,13 +92,37 @@ const run = async () => {
   return output
 }
 
-run()
+const directory = "precompute"
+if ( !existsSync(directory) ) {
+  mkdirSync(directory, {recursive: true})
+}
+
+setDashboardCache()
   .then(result => {
-    const directory = "precompute"
-    if ( !existsSync(directory) ) {
-      mkdirSync(directory, {recursive: true})
-    }
     writeFileSync(path.join(directory, "cache.json"), 
       JSON.stringify(result)
+    )
+  }).then(() => {
+    Promise.all(
+      AVAILABLE_HOSPITALS.en.map((hospital) => {
+        const today = new Date();
+        const yesterday = new Date();
+        const lastWeek = new Date();
+        yesterday.setDate(today.getDate() - 1);
+        lastWeek.setDate(today.getDate() - 7);
+        Promise.all([
+          getCalculatedWaitTime(today, hospital as Hospital),
+          getCalculatedWaitTime(yesterday, hospital as Hospital),
+          getCalculatedWaitTime(lastWeek, hospital as Hospital),
+        ]).then(([tr, yr, lwr]) => {
+          writeFileSync(path.join(directory, `${hospital.replace(/ /g, "_")}.json`), 
+            JSON.stringify({
+              calculatedWaitTimes: tr,
+              calculatedYesterdayWaitTimes: yr,
+              calculatedLastWeekWaitTimes: lwr,
+            })
+          )
+        });
+      })
     )
   })
