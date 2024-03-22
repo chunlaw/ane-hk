@@ -145,6 +145,11 @@
   dependencies:
     undici-types "~5.26.4"
 
+ane-hk@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/ane-hk/-/ane-hk-1.1.2.tgz#14a3f242fb21d89f22f6b2b707c27498da742951"
+  integrity sha512-0VZ1gLOli88NQNYlC3ei7vwPqLrh34kXA7wLTDIqFekEGkqQfAqfQUN31zEVB2ZzUCJzUN4dATR8FhUBmrivTQ==
+
 array-union@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/array-union/-/array-union-1.0.2.tgz#9a34410e4f4e3da23dea375be5be70f24778ec39"
@@ -190,10 +195,15 @@ concat-map@0.0.1:
   resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
   integrity sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==
 
-date-fns@*, date-fns@^3.4.0:
+date-fns@*:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-3.4.0.tgz#19ac3c19a39af64acb21c23587cb08504dcdc3de"
   integrity sha512-Akz4R8J9MXBsOgF1QeWeCsbv6pntT5KCPjU0Q9prBxVmWJYPLhwAIsNg3b0QAdr0ttiozYLD3L/af7Ra0jqYXw==
+
+date-fns@^3.6.0:
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-3.6.0.tgz#f20ca4fe94f8b754951b24240676e8618c0206bf"
+  integrity sha512-fRHTG8g/Gif+kSh50gaGEdToemgfj74aRX3swtiouboip5JDLAyDE9F11nHMIcvOaXeOC6D7SpNhi7uFyB7Uww==
 
 email-addresses@^5.0.0:
   version "5.0.0"
