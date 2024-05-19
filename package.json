@@ -1,5 +1,5 @@
 {
-  "name": "ane-hk",
+  "name": "ane-hk-crawling",
   "version": "1.0.0",
   "description": "Regularly crawl A&E waiting time",
   "repository": "https://github.com/chunlaw/ane-hk",
