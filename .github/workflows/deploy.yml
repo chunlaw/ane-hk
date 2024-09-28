@@ -48,7 +48,7 @@ jobs:
         single-commit: true
     - run: yarn run precompute
     - name: Update cache
-      uses: JamesIves/github-pages-deploy-action@v4
+      uses: JamesIves/github-pages-deploy-action@v4.6.4
       with:
         branch: cache # The branch the action should deploy to.
         folder: precompute # The folder the action should deploy.
